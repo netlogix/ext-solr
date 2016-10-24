@@ -135,7 +135,7 @@ class Relation
 
         if (isset($localTableTca['columns'][$localFieldName])) {
             $localFieldTca = $localTableTca['columns'][$localFieldName];
-            $localRecordUid = $this->getUidOfRecordOverlay($localTableName, $localRecordUid);
+            $localRecordUid = $this->getUidOfRecordOverlay($localTableName, $localRecordUid, $localFieldTca);
             if (isset($localFieldTca['config']['MM']) && trim($localFieldTca['config']['MM']) !== '') {
                 $relatedItems = $this->getRelatedItemsFromMMTable($localTableName,
                     $localRecordUid, $localFieldTca);
@@ -385,12 +385,17 @@ class Relation
      *
      * @param string $localTableName
      * @param integer $localRecordUid
+     * @param array $localFieldTca
      * @return integer
      */
-    protected function getUidOfRecordOverlay($localTableName, $localRecordUid)
+    protected function getUidOfRecordOverlay($localTableName, $localRecordUid, $localFieldTca)
     {
         // when no language is set at all we do not need to overlay
         if (!isset($GLOBALS['TSFE']->sys_language_uid)) {
+            return $localRecordUid;
+        }
+        // when non translatable relation
+        if ($localFieldTca['l10n_mode'] === 'exclude') {
             return $localRecordUid;
         }
         // when no language is set we can return the passed recordUid
